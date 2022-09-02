@@ -3,7 +3,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RestaurantTest {
@@ -102,4 +108,41 @@ class RestaurantTest {
                 () -> restaurant.addToMenu("Sizzling brownie", 0));
     }
     //<<<<<<<<<<<<<<<<<<<<<<<MENU>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    //>>>>>>>>>>>>>>>>>>>>>>>>>>>ORDER<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    @Test
+    public void cost_should_be_zero_if_do_not_choose_any_items() throws itemNotFoundException {
+        assertEquals(0, restaurant.calculateOrderValue(null));
+        assertEquals(0, restaurant.calculateOrderValue(Collections.emptyList()));
+    }
+
+    @Test
+    public void giving_not_existed_selected_item_name_should_throw_exception() throws itemNotFoundException {
+        assertThrows(itemNotFoundException.class,
+                () -> restaurant.calculateOrderValue(List.of("Not existed")));
+    }
+
+    @Test
+    public void cost_should_be_greater_than_zero_if_choose_at_least_one_item() throws itemNotFoundException {
+        List<Item> items = restaurant.getMenu();
+        List<String> selectedItemNames = new ArrayList<>();
+        selectedItemNames.add(items.get(0).getName());
+        assertThat(restaurant.calculateOrderValue(selectedItemNames), greaterThan(0l));
+        selectedItemNames.add(items.get(1).getName());
+        assertThat(restaurant.calculateOrderValue(selectedItemNames), greaterThan(0l));
+    }
+
+    @Test
+    public void cost_should_be_the_item_price_if_choose_only_one_item() throws itemNotFoundException {
+        Item firstItem = restaurant.getMenu().get(0);
+        assertEquals(firstItem.getPrice(), restaurant.calculateOrderValue(List.of(firstItem.getName())));
+    }
+
+    @Test
+    public void cost_should_be_equal_the_total_selected_items_price() throws itemNotFoundException {
+        List<Item> items = restaurant.getMenu();
+        long total = items.get(0).getPrice() + items.get(1).getPrice();
+        assertEquals(total, restaurant.calculateOrderValue(Arrays.asList(items.get(0).getName(), items.get(1).getName())));
+    }
+    //<<<<<<<<<<<<<<<<<<<<<<<ORDER>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 }
