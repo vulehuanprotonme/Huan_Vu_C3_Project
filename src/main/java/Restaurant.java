@@ -19,6 +19,10 @@ public class Restaurant {
 
     public boolean isRestaurantOpen() {
         LocalTime now = getCurrentTime();
+        // The restaurant opens between 2 days
+        if (openingTime.isAfter(closingTime)) {
+            return now.isBefore(closingTime);
+        }
         return now.isAfter(openingTime) && now.isBefore(closingTime);
     }
 
@@ -36,7 +40,13 @@ public class Restaurant {
         return null;
     }
 
-    public void addToMenu(String name, int price) {
+    public void addToMenu(String name, int price) throws itemInvalidException {
+        if (name == null || name.trim().length() == 0 || price <= 0) {
+            throw new itemInvalidException(name, price);
+        }
+        if (findItemByName(name) != null) {
+            throw new itemInvalidException(name, price);
+        }
         Item newItem = new Item(name,price);
         menu.add(newItem);
     }
@@ -62,4 +72,15 @@ public class Restaurant {
         return name;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+
+    public LocalTime getClosingTime() {
+        return closingTime;
+    }
 }
